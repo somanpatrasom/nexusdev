@@ -12,7 +12,7 @@ HOSTNAME=$(hostname)
 
 #If not an SSH login, exit silently
 if [ -z "$SSH_CLIENT" ]; then
-    exit 0
+    return 0
 fi
 
 # Log to PostgreSQL
