@@ -1,0 +1,17 @@
+# Maven build output
+target/
+
+# Compiled Java classes
+*.class
+
+# Sensitive config (never commit passwords)
+*.env
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.idea/
+*.iml
+.vscode/
