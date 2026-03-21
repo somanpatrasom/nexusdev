@@ -23,10 +23,8 @@ public class FileClient {
 
         try (
             Socket socket = new Socket(targetIP, PORT);
-            DataOutputStream out =
-                new DataOutputStream(socket.getOutputStream());
-            DataInputStream in =
-                new DataInputStream(socket.getInputStream());
+            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+            DataInputStream in = new DataInputStream(socket.getInputStream());
             FileInputStream fis = new FileInputStream(file)
         ) {
             // Send filename
