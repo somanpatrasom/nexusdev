@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Invite Member — NexusDev</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>⚡ NexusDev</h1>
+        <p>Invite a new member</p>
+    </div>
+    <div class="section">
+        <h2>Generate Invite Code</h2>
+        <form id="inviteForm">
+            <div style="margin-bottom:1rem">
+                <label style="display:block;margin-bottom:0.5rem;color:#8b949e">
+                    Full Name
+                </label>
+                <input type="text" id="name"
+                       style="width:100%;padding:0.75rem;background:#0f1117;
+                              border:1px solid #21262d;border-radius:6px;
+                              color:#e1e4e8;font-size:1rem">
+            </div>
+            <div style="margin-bottom:1.5rem">
+                <label style="display:block;margin-bottom:0.5rem;color:#8b949e">
+                    Username
+                </label>
+                <input type="text" id="username"
+                       style="width:100%;padding:0.75rem;background:#0f1117;
+                              border:1px solid #21262d;border-radius:6px;
+                              color:#e1e4e8;font-size:1rem">
+            </div>
+            <button type="button" onclick="generateInvite()"
+                    class="btn" style="width:100%;padding:0.75rem;
+                                       font-size:1rem;cursor:pointer">
+                Generate Invite Code
+            </button>
+        </form>
+        <div id="result" style="margin-top:1.5rem;display:none">
+            <div style="background:#1f3d2f;border:1px solid #2ea043;
+                        border-radius:8px;padding:1.5rem">
+                <p style="color:#56d364;margin-bottom:0.5rem">
+                    ✅ Invite created successfully!
+                </p>
+                <p style="color:#8b949e;margin-bottom:0.5rem">
+                    Share this code:
+                </p>
+                <code id="inviteCode" style="font-size:1.2rem"></code>
+            </div>
+        </div>
+    </div>
+    <a href="/dashboard" style="color:#58a6ff">← Back to dashboard</a>
+</div>
+<script>
+async function generateInvite() {
+    const name = document.getElementById('name').value;
+    const username = document.getElementById('username').value;
+
+    if (!name || !username) {
+        alert('Please fill in both fields');
+        return;
+    }
+
+    const response = await fetch('/api/users/invite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, username })
+    });
+
+    const text = await response.text();
+    const code = text.split('Invite code: ')[1].split('\n')[0];
+
+    document.getElementById('inviteCode').textContent = code;
+    document.getElementById('result').style.display = 'block';
+}
+</script>
+</body>
+</html>

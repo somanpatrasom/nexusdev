@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexusDev Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div class="container">
+
+    <!-- Header -->
+    <div class="header">
+        <h1>⚡ NexusDev</h1>
+        <p>Your Personal Dev Lab</p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="card">
+            <div class="card-number" th:text="${totalUsers}">0</div>
+            <div class="card-label">Total Users</div>
+        </div>
+        <div class="card">
+            <div class="card-number" th:text="${totalSessions}">0</div>
+            <div class="card-label">Sessions Logged</div>
+        </div>
+        <div class="card">
+            <div class="card-number" th:text="${totalDevices}">0</div>
+            <div class="card-label">Devices</div>
+        </div>
+        <div class="card">
+            <div class="card-number" th:text="${totalMembers}">0</div>
+            <div class="card-label">Members</div>
+        </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="section">
+        <div class="section-header">
+            <h2>Team Members</h2>
+            <a href="/invite" class="btn">+ Invite Member</a>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>Invite Code</th>
+                    <th>Joined</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="user : ${users}">
+                    <td th:text="${user.name}">-</td>
+                    <td th:text="${user.username}">-</td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${user.role == 'admin'} ? 'badge-admin' : 'badge-member'"
+                              th:text="${user.role}">-</span>
+                    </td>
+                    <td><code th:text="${user.inviteCode}">-</code></td>
+                    <td th:text="${#temporals.format(user.joinedAt, 'dd MMM yyyy')}">-</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Recent Sessions -->
+    <div class="section">
+        <h2>Recent Sessions</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Topic</th>
+                    <th>Duration</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="learningSession : ${sessions}">
+                    <td th:text="${learningSession.id}">-</td>
+                    <td th:text="${learningSession.topic}">-</td>
+                    <td th:text="${learningSession.durationMinutes + ' mins'}">-</td>
+                    <td th:text="${#temporals.format(learningSession.createdAt, 'dd MMM yyyy HH:mm')}">-</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Devices -->
+    <div class="section">
+        <h2>Registered Devices</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>IP Address</th>
+                    <th>First Seen</th>
+                    <th>Last Seen</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="device : ${devices}">
+                    <td th:text="${device.name}">-</td>
+                    <td th:text="${device.ipAddress}">-</td>
+                    <td th:text="${#temporals.format(device.firstSeen, 'dd MMM yyyy')}">-</td>
+                    <td th:text="${#temporals.format(device.lastSeen, 'dd MMM yyyy')}">-</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+</body>
+</html>

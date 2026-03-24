@@ -1,0 +1,150 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0f1117;
+    color: #e1e4e8;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.header {
+    text-align: center;
+    padding: 2rem 0 3rem;
+    border-bottom: 1px solid #21262d;
+    margin-bottom: 2rem;
+}
+
+.header h1 {
+    font-size: 2.5rem;
+    color: #58a6ff;
+    margin-bottom: 0.5rem;
+}
+
+.header p {
+    color: #8b949e;
+    font-size: 1rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.card {
+    background: #161b22;
+    border: 1px solid #21262d;
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.card-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #58a6ff;
+}
+
+.card-label {
+    color: #8b949e;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+}
+
+.section {
+    background: #161b22;
+    border: 1px solid #21262d;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.section h2 {
+    color: #e1e4e8;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    text-align: left;
+    padding: 0.75rem;
+    color: #8b949e;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    border-bottom: 1px solid #21262d;
+}
+
+td {
+    padding: 0.75rem;
+    border-bottom: 1px solid #21262d;
+    font-size: 0.9rem;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+tr:hover td {
+    background: #1c2128;
+}
+
+code {
+    background: #21262d;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    color: #79c0ff;
+}
+
+.badge {
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.badge-admin {
+    background: #1f3d2f;
+    color: #56d364;
+}
+
+.badge-member {
+    background: #1c2b4a;
+    color: #58a6ff;
+}
+
+.btn {
+    background: #238636;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.85rem;
+}
+
+.btn:hover {
+    background: #2ea043;
+}
