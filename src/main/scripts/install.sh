@@ -480,23 +480,21 @@ setup_directories() {
 copy_jar() {
     print_step "Installing NexusDev"
 
-    # Look for the JAR — check common locations
-    JAR_SRC=""
-    [ -f "./target/nexusdev-1.0-SNAPSHOT.jar" ] && JAR_SRC="./target/nexusdev-1.0-SNAPSHOT.jar"
-    [ -f "./nexusdev.jar"                      ] && JAR_SRC="./nexusdev.jar"
-    [ -f "/opt/nexusdev/nexusdev.jar"          ] && JAR_SRC="/opt/nexusdev/nexusdev.jar"
-
-    if [ -n "$JAR_SRC" ]; then
-        cp "$JAR_SRC" /opt/nexusdev/nexusdev.jar
-        print_ok "NexusDev installed from: $JAR_SRC"
+    # Priority: local build → local nexusdev.jar → already installed
+    if [ -f "./target/nexusdev-1.0-SNAPSHOT.jar" ]; then
+        cp ./target/nexusdev-1.0-SNAPSHOT.jar /opt/nexusdev/nexusdev.jar
+        print_ok "NexusDev installed from: ./target/nexusdev-1.0-SNAPSHOT.jar"
+    elif [ -f "./nexusdev.jar" ]; then
+        cp ./nexusdev.jar /opt/nexusdev/nexusdev.jar
+        print_ok "NexusDev installed from: ./nexusdev.jar"
+    elif [ -f "/opt/nexusdev/nexusdev.jar" ]; then
+        print_ok "NexusDev already installed at /opt/nexusdev/nexusdev.jar"
     else
         print_err "NexusDev JAR not found."
-        print_info "Please run this installer from your project directory"
-        print_info "or place nexusdev.jar in the current folder."
+        print_info "Please run this installer from your project directory."
         exit 1
     fi
 }
-
 # ── Write config ──────────────────────────────────────────────
 write_config() {
     print_step "Writing configuration"
@@ -625,20 +623,19 @@ print_summary() {
     echo -e "${GREEN}╠══════════════════════════════════════════╣${RESET}"
     echo -e "${GREEN}║                                          ║${RESET}"
     echo -e "${GREEN}║  Dashboard                               ║${RESET}"
-    echo -e "${GREEN}║  ${CYAN}http://${MACHINE_IP}:8080${RESET}"
-    echo -e "${GREEN}║                                          ║${RESET}"
     echo -e "${GREEN}║  SSH access                              ║${RESET}"
-    echo -e "${GREEN}║  ${CYAN}ssh ${USER}@${MACHINE_IP}${RESET}"
-    echo -e "${GREEN}║                                          ║${RESET}"
-    echo -e "${GREEN}║  Share this with your team               ║${RESET}"
-    echo -e "${GREEN}║  ${YELLOW}${LAB_JOIN_CODE}${RESET}"
+    echo -e "${GREEN}║  Team join code                          ║${RESET}"
     echo -e "${GREEN}║                                          ║${RESET}"
     echo -e "${GREEN}╚══════════════════════════════════════════╝${RESET}"
+    echo ""
+    echo -e "  ${CYAN}Dashboard   →${RESET}  http://${MACHINE_IP}:8080"
+    echo -e "  ${CYAN}SSH access  →${RESET}  ssh ${USER}@${MACHINE_IP}"
+    echo -e "  ${YELLOW}Join code   →${RESET}  ${YELLOW}${LAB_JOIN_CODE}${RESET}"
     echo ""
 
     if [ "$WSL_MODE" = true ]; then
         echo -e "  ${YELLOW}WSL detected — start NexusDev manually:${RESET}"
-        echo -e "  ${CYAN}java -jar /opt/nexusdev/nexusdev.jar \\${RESET}"
+        echo -e "  ${CYAN}java -jar /opt/nexusdev/nexusdev.jar${RESET} \\"
         echo -e "  ${CYAN}  --spring.config.location=file:/opt/nexusdev/config/application.properties${RESET}"
         echo ""
     else
