@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab — NexusDev</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="container">
+
+    <div class="header">
+        <h1>⚡ NexusDev</h1>
+        <p th:text="${template != null ? template.name : 'Lab Instance'}">Lab</p>
+    </div>
+
+    <!-- Instance found -->
+    <div th:if="${instance != null}">
+
+        <!-- Stats row -->
+        <div class="stats-grid">
+            <div class="card">
+                <div class="card-number"
+                     th:text="${instance.status}"
+                     th:style="${instance.status == 'active'} ? 'color: #4ade80' : 'color: #94a3b8'">
+                    -
+                </div>
+                <div class="card-label">Status</div>
+            </div>
+            <div class="card">
+                <div class="card-number"
+                     th:text="${template != null ? template.durationMinutes + 'm' : '-'}">-</div>
+                <div class="card-label">Target Duration</div>
+            </div>
+            <div class="card">
+                <div class="card-number" th:text="${instance.id}">-</div>
+                <div class="card-label">Instance ID</div>
+            </div>
+        </div>
+
+        <!-- Template info -->
+        <div class="section" th:if="${template != null}">
+            <h2>Template Info</h2>
+            <table>
+                <tr>
+                    <td><strong>Topic</strong></td>
+                    <td th:text="${template.topic}">-</td>
+                </tr>
+                <tr>
+                    <td><strong>Share Code</strong></td>
+                    <td><code th:text="${template.shareCode}">-</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Started</strong></td>
+                    <td th:text="${#temporals.format(instance.startedAt, 'dd MMM yyyy HH:mm')}">-</td>
+                </tr>
+                <tr th:if="${instance.completedAt != null}">
+                    <td><strong>Completed</strong></td>
+                    <td th:text="${#temporals.format(instance.completedAt, 'dd MMM yyyy HH:mm')}">-</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Notes -->
+        <div class="section">
+            <h2>Lab Notes</h2>
+            <textarea id="notes" rows="12"
+                      th:text="${instance.notes}"
+                      style="width: 100%; padding: 1rem; border-radius: 8px;
+                             border: 1px solid var(--border); background: var(--bg-card);
+                             color: var(--text-primary); font-family: monospace;
+                             font-size: 0.9rem; resize: vertical; box-sizing: border-box;">
+            </textarea>
+        </div>
+
+        <!-- Actions -->
+        <div class="section">
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+
+                <button id="completeBtn"
+                        th:attr="onclick='completeInstance(' + ${instance.id} + ')'"
+                        th:disabled="${instance.status == 'completed'}"
+                        style="padding: 0.6rem 1.4rem; border-radius: 6px;
+                               background: var(--accent); color: white;
+                               border: none; cursor: pointer; font-size: 0.95rem;">
+                    Mark Complete
+                </button>
+
+                <a href="/dashboard/templates"
+                   style="padding: 0.6rem 1.4rem; border-radius: 6px;
+                          background: var(--bg-card); color: var(--text-primary);
+                          border: 1px solid var(--border); text-decoration: none;
+                          font-size: 0.95rem;">
+                    Back to Templates
+                </a>
+
+            </div>
+            <div id="actionResult"
+                 style="margin-top: 1rem; color: var(--text-secondary);">
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Instance not found -->
+    <div th:if="${instance == null}" class="section">
+        <p style="color: var(--text-secondary);">Lab instance not found.</p>
+        <a href="/dashboard/templates" class="btn">Back</a>
+    </div>
+
+</div>
+
+<script>
+function completeInstance(id) {
+    fetch('/api/templates/instances/' + id + '/complete', {
+        method: 'POST'
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+        document.getElementById('actionResult').textContent = 'Lab marked as complete!';
+        setTimeout(function() { location.reload(); }, 1000);
+    })
+    .catch(function() {
+        document.getElementById('actionResult').textContent = 'Error — could not complete lab.';
+    });
+}
+</script>
+
+</body>
+</html>

@@ -8,6 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import com.nexusdev.repository.LabInstanceRepository;
+import com.nexusdev.repository.LabTemplateRepository;
+import com.nexusdev.service.LabTemplateService;
 
 @Controller
 public class DashboardController {
@@ -20,6 +23,15 @@ public class DashboardController {
 
     @Autowired
     private DeviceRepository deviceRepository;
+
+    @Autowired
+    private LabTemplateRepository labTemplateRepository;
+
+    @Autowired
+    private LabInstanceRepository labInstanceRepository;
+
+    @Autowired
+    private LabTemplateService labTemplateService;
 
     // Main dashboard — redirects based on role
     @GetMapping("/")
@@ -38,6 +50,7 @@ public class DashboardController {
         model.addAttribute("totalDevices", deviceRepository.count());
         model.addAttribute("totalAdmins", userRepository.countByRole("admin"));
         model.addAttribute("totalMembers", userRepository.countByRole("member"));
+        model.addAttribute("totalTemplates", labTemplateRepository.count());
         return "dashboard";
     }
 
@@ -52,5 +65,25 @@ public class DashboardController {
     @GetMapping("/join")
     public String joinPage() {
         return "join";
+    }
+
+    // Templates list page
+    @GetMapping("/dashboard/templates")
+    public String templatesPage(Model model) {
+        model.addAttribute("templates", labTemplateRepository.findAll());
+        model.addAttribute("totalTemplates", labTemplateRepository.count());
+        model.addAttribute("totalInstances", labInstanceRepository.count());
+        return "templates";
+    }
+
+    // Individual lab instance page
+    @GetMapping("/dashboard/lab/{id}")
+    public String labPage(@PathVariable Integer id, Model model) {
+        labTemplateService.getInstanceById(id).ifPresent(instance -> {
+            model.addAttribute("instance", instance);
+            labTemplateService.getTemplateById(instance.getTemplateId())
+                .ifPresent(template -> model.addAttribute("template", template));
+        });
+        return "lab";
     }
 }

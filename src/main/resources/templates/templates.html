@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab Templates — NexusDev</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="container">
+
+    <div class="header">
+        <h1>⚡ NexusDev</h1>
+        <p>Lab Templates</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="card">
+            <div class="card-number" th:text="${totalTemplates}">0</div>
+            <div class="card-label">Templates</div>
+        </div>
+        <div class="card">
+            <div class="card-number" th:text="${totalInstances}">0</div>
+            <div class="card-label">Active Labs</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>All Templates</h2>
+            <a href="/dashboard" class="btn">← Back</a>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Topic</th>
+                    <th>Duration</th>
+                    <th>Share Code</th>
+                    <th>Created</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="tmpl : ${templates}">
+                    <td th:text="${tmpl.id}">-</td>
+                    <td th:text="${tmpl.name}">-</td>
+                    <td th:text="${tmpl.topic}">-</td>
+                    <td th:text="${tmpl.durationMinutes + ' mins'}">-</td>
+                    <td><code th:text="${tmpl.shareCode}">-</code></td>
+                    <td th:text="${#temporals.format(tmpl.createdAt, 'dd MMM yyyy')}">-</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Spawn a lab form -->
+    <div class="section">
+        <h2>Spawn a Lab</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+            Enter a share code and your user ID to start a lab instance.
+        </p>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <input type="text" id="shareCode" placeholder="LAB-XXXXXX"
+                   style="padding: 0.6rem 1rem; border-radius: 6px;
+                          border: 1px solid var(--border); background: var(--bg-card);
+                          color: var(--text-primary); font-size: 0.95rem;">
+            <input type="number" id="userId" placeholder="User ID"
+                   style="padding: 0.6rem 1rem; border-radius: 6px; width: 120px;
+                          border: 1px solid var(--border); background: var(--bg-card);
+                          color: var(--text-primary); font-size: 0.95rem;">
+            <button onclick="spawnLab()"
+                    style="padding: 0.6rem 1.4rem; border-radius: 6px;
+                           background: var(--accent); color: white;
+                           border: none; cursor: pointer; font-size: 0.95rem;">
+                Spawn Lab
+            </button>
+        </div>
+        <div id="spawnResult" style="margin-top: 1rem; color: var(--text-secondary);"></div>
+    </div>
+
+</div>
+
+<script>
+function spawnLab() {
+    const shareCode = document.getElementById('shareCode').value.trim();
+    const userId = parseInt(document.getElementById('userId').value);
+
+    if (!shareCode || !userId) {
+        document.getElementById('spawnResult').textContent = 'Please enter both share code and user ID.';
+        return;
+    }
+
+    fetch('/api/templates/spawn', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ shareCode, userId })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.id) {
+            document.getElementById('spawnResult').innerHTML =
+                `✅ Lab spawned! Instance ID: <strong>${data.id}</strong> — 
+                 <a href="/dashboard/lab/${data.id}" style="color: var(--accent);">View Lab →</a>`;
+        } else {
+            document.getElementById('spawnResult').textContent = '❌ Failed to spawn lab.';
+        }
+    })
+    .catch(() => {
+        document.getElementById('spawnResult').textContent = '❌ Error connecting to server.';
+    });
+}
+</script>
+</body>
+</html>
