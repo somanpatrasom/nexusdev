@@ -28,6 +28,15 @@ public class LabInstance {
     @Column(name = "completed_at")
     private LocalDateTime completedAt;
 
+    @Column(name = "container_id")
+    private String containerId;
+
+    @Column(name = "ssh_port")
+    private Integer sshPort;
+
+    @Column(name = "lab_status")
+    private String labStatus;
+
     // Getters and Setters
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
@@ -49,4 +58,13 @@ public class LabInstance {
 
     public LocalDateTime getCompletedAt() { return completedAt; }
     public void setCompletedAt(LocalDateTime completedAt) { this.completedAt = completedAt; }
+
+    public String getContainerId() {return containerId;}
+    public void setContainerId(String containerId) { this.containerId = containerId; }
+
+    public Integer getSshPort() { return sshPort; }
+    public void setSshPort(Integer sshPort) { this.sshPort = sshPort; }
+
+    public String getLabStatus() { return labStatus; }
+    public void setLabStatus(String labStatus) { this.labStatus = labStatus; }
 }

@@ -1,0 +1,51 @@
+# ============================================================
+#  NexusDev Lab Container
+#  One container per lab — multiple users share this environment
+# ============================================================
+
+# Start from Ubuntu 24.04 — same OS as your WSL machine
+FROM ubuntu:24.04
+
+# Prevent interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# ── System update ────────────────────────────────────────────
+RUN apt-get update && apt-get install -y \
+    sudo \
+    openssh-server \
+    curl \
+    wget \
+    git \
+    vim \
+    nano \
+    htop \
+    net-tools \
+    iputils-ping \
+    && rm -rf /var/lib/apt/lists/*
+
+# ── SSH setup ────────────────────────────────────────────────
+# SSH server needs this directory to exist
+RUN mkdir /var/run/sshd
+
+# Allow password authentication over SSH
+RUN sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' \
+    /etc/ssh/sshd_config
+RUN sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/' \
+    /etc/ssh/sshd_config
+
+# ── Lab directory structure ───────────────────────────────────
+RUN mkdir -p /lab/shared \
+             /lab/admin
+
+# Create a group for lab members — used for shared folder access
+RUN groupadd labmembers
+
+# Give labmembers group access to shared folder
+RUN chown root:labmembers /lab/shared && \
+    chmod 2775 /lab/shared
+
+# ── Expose SSH port ───────────────────────────────────────────
+EXPOSE 22
+
+# ── Start SSH server when container starts ────────────────────
+CMD ["/usr/sbin/sshd", "-D"]
