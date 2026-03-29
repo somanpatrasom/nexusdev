@@ -5,6 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lab — NexusDev</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+
+    <!-- xterm.js — the terminal renderer -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script>
+
+    <style>
+        .terminal-container {
+            background: #0d0d0d;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            border: 1px solid var(--border);
+        }
+        .terminal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+        .terminal-title {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-family: monospace;
+        }
+        .terminal-status {
+            font-size: 0.8rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            background: #1a3a1a;
+            color: #4ade80;
+        }
+        #terminal {
+            height: 400px;
+        }
+    </style>
 </head>
 <body>
 <div class="container">
@@ -14,27 +51,33 @@
         <p th:text="${template != null ? template.name : 'Lab Instance'}">Lab</p>
     </div>
 
-    <!-- Instance found -->
     <div th:if="${instance != null}">
 
-        <!-- Stats row -->
+        <!-- Stats -->
         <div class="stats-grid">
             <div class="card">
                 <div class="card-number"
-                     th:text="${instance.status}"
-                     th:style="${instance.status == 'active'} ? 'color: #4ade80' : 'color: #94a3b8'">
-                    -
-                </div>
-                <div class="card-label">Status</div>
+                     th:text="${instance.labStatus}"
+                     th:style="${instance.labStatus == 'running'}
+                                ? 'color: #4ade80' : 'color: #94a3b8'">-</div>
+                <div class="card-label">Container</div>
             </div>
             <div class="card">
                 <div class="card-number"
-                     th:text="${template != null ? template.durationMinutes + 'm' : '-'}">-</div>
-                <div class="card-label">Target Duration</div>
+                     th:text="${instance.sshPort != null ? instance.sshPort : '-'}">-</div>
+                <div class="card-label">SSH Port</div>
             </div>
             <div class="card">
-                <div class="card-number" th:text="${instance.id}">-</div>
-                <div class="card-label">Instance ID</div>
+                <div class="card-number"
+                     th:text="${instance.containerId != null
+                                ? instance.containerId : '-'}">-</div>
+                <div class="card-label">Container ID</div>
+            </div>
+            <div class="card">
+                <div class="card-number"
+                     th:text="${template != null
+                                ? template.durationMinutes + 'm' : '-'}">-</div>
+                <div class="card-label">Duration</div>
             </div>
         </div>
 
@@ -52,48 +95,84 @@
                 </tr>
                 <tr>
                     <td><strong>Started</strong></td>
-                    <td th:text="${#temporals.format(instance.startedAt, 'dd MMM yyyy HH:mm')}">-</td>
+                    <td th:text="${#temporals.format(
+                        instance.startedAt, 'dd MMM yyyy HH:mm')}">-</td>
                 </tr>
                 <tr th:if="${instance.completedAt != null}">
                     <td><strong>Completed</strong></td>
-                    <td th:text="${#temporals.format(instance.completedAt, 'dd MMM yyyy HH:mm')}">-</td>
+                    <td th:text="${#temporals.format(
+                        instance.completedAt, 'dd MMM yyyy HH:mm')}">-</td>
                 </tr>
             </table>
+        </div>
+
+        <!-- Browser Terminal -->
+        <div class="section"
+             th:if="${instance.labStatus == 'running'}">
+            <div class="terminal-header">
+                <h2 style="margin: 0;">Terminal</h2>
+                <span class="terminal-status">● connected</span>
+            </div>
+            <p style="color: var(--text-secondary);
+                      font-size: 0.85rem; margin-bottom: 0.5rem;">
+                Direct terminal access to your lab container.
+                Type commands and press Enter.
+            </p>
+            <div class="terminal-container">
+                <div class="terminal-title">
+                    lab /
+                    <span th:text="${instance.containerId}">container</span>
+                </div>
+                <div id="terminal" th:attr="data-instance-id=${instance.id}"></div>
+            </div>
+        </div>
+
+        <!-- Lab stopped message -->
+        <div class="section"
+             th:if="${instance.labStatus != 'running'}">
+            <p style="color: var(--text-secondary);">
+                This lab is not currently running.
+                Terminal is unavailable.
+            </p>
         </div>
 
         <!-- Notes -->
         <div class="section">
             <h2>Lab Notes</h2>
-            <textarea id="notes" rows="12"
+            <textarea id="notes" rows="10"
                       th:text="${instance.notes}"
-                      style="width: 100%; padding: 1rem; border-radius: 8px;
-                             border: 1px solid var(--border); background: var(--bg-card);
-                             color: var(--text-primary); font-family: monospace;
-                             font-size: 0.9rem; resize: vertical; box-sizing: border-box;">
+                      style="width: 100%; padding: 1rem;
+                             border-radius: 8px;
+                             border: 1px solid var(--border);
+                             background: var(--bg-card);
+                             color: var(--text-primary);
+                             font-family: monospace;
+                             font-size: 0.9rem;
+                             resize: vertical;
+                             box-sizing: border-box;">
             </textarea>
         </div>
 
         <!-- Actions -->
         <div class="section">
-            <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
-
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
                 <button id="completeBtn"
                         th:attr="onclick='completeInstance(' + ${instance.id} + ')'"
                         th:disabled="${instance.status == 'completed'}"
                         style="padding: 0.6rem 1.4rem; border-radius: 6px;
                                background: var(--accent); color: white;
-                               border: none; cursor: pointer; font-size: 0.95rem;">
+                               border: none; cursor: pointer;
+                               font-size: 0.95rem;">
                     Mark Complete
                 </button>
-
                 <a href="/dashboard/templates"
                    style="padding: 0.6rem 1.4rem; border-radius: 6px;
-                          background: var(--bg-card); color: var(--text-primary);
-                          border: 1px solid var(--border); text-decoration: none;
-                          font-size: 0.95rem;">
+                          background: var(--bg-card);
+                          color: var(--text-primary);
+                          border: 1px solid var(--border);
+                          text-decoration: none; font-size: 0.95rem;">
                     Back to Templates
                 </a>
-
             </div>
             <div id="actionResult"
                  style="margin-top: 1rem; color: var(--text-secondary);">
@@ -102,13 +181,75 @@
 
     </div>
 
-    <!-- Instance not found -->
     <div th:if="${instance == null}" class="section">
         <p style="color: var(--text-secondary);">Lab instance not found.</p>
         <a href="/dashboard/templates" class="btn">Back</a>
     </div>
 
 </div>
+
+<script th:if="${instance != null and instance.labStatus == 'running'}">
+    /*<![CDATA[*/
+    const instanceId = document.getElementById('terminal').dataset.instanceId;
+
+    // Create the terminal
+    const term = new Terminal({
+        cursorBlink: true,
+        fontSize: 14,
+        fontFamily: 'Menlo, Monaco, "Courier New", monospace',
+        theme: {
+            background: '#0d0d0d',
+            foreground: '#e2e8f0',
+            cursor: '#4ade80',
+            selection: '#374151'
+        }
+    });
+
+    // FitAddon resizes terminal to fill its container
+    const fitAddon = new FitAddon.FitAddon();
+    term.loadAddon(fitAddon);
+    term.open(document.getElementById('terminal'));
+    fitAddon.fit();
+    term.focus();
+    document.getElementById('terminal').addEventListener('click', function() {
+        term.focus();
+    });
+
+    // Connect to WebSocket
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = protocol + '//' + window.location.host + '/terminal/' + instanceId;
+    const socket = new WebSocket(wsUrl);
+
+    socket.onopen = function() {
+        term.write('\r\n\x1b[32mConnected to lab container.\x1b[0m\r\n\r\n');
+    };
+
+    // When server sends output → display in terminal
+    socket.onmessage = function(event) {
+        term.write(event.data);
+    };
+
+    socket.onclose = function() {
+        term.write('\r\n\x1b[31mConnection closed.\x1b[0m\r\n');
+    };
+
+    socket.onerror = function() {
+        term.write('\r\n\x1b[31mConnection error.\x1b[0m\r\n');
+    };
+
+    // When user types → send to server
+    term.onData(function(data) {
+        if (socket.readyState === WebSocket.OPEN) {
+            socket.send(data);
+        }
+    });
+
+    // Resize terminal when window resizes
+    window.addEventListener('resize', function() {
+        fitAddon.fit();
+    });
+    /*]]>*/
+</script>
 
 <script>
 function completeInstance(id) {
@@ -117,11 +258,13 @@ function completeInstance(id) {
     })
     .then(function(res) { return res.json(); })
     .then(function(data) {
-        document.getElementById('actionResult').textContent = 'Lab marked as complete!';
+        document.getElementById('actionResult')
+            .textContent = 'Lab marked as complete!';
         setTimeout(function() { location.reload(); }, 1000);
     })
     .catch(function() {
-        document.getElementById('actionResult').textContent = 'Error — could not complete lab.';
+        document.getElementById('actionResult')
+            .textContent = 'Error — could not complete lab.';
     });
 }
 </script>
