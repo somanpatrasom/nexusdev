@@ -36,7 +36,7 @@ public class DashboardController {
     // Main dashboard — redirects based on role
     @GetMapping("/")
     public String index() {
-        return "redirect:/dashboard";
+        return "redirect:/login";
     }
 
     // Dashboard page
@@ -85,5 +85,10 @@ public class DashboardController {
                 .ifPresent(template -> model.addAttribute("template", template));
         });
         return "lab";
+    }
+
+    @GetMapping("/login")
+    public String loginPage() {
+        return "login";
     }
 }

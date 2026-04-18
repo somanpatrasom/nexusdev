@@ -26,6 +26,9 @@ public class User {
     @Column(name = "joined_at")
     private LocalDateTime joinedAt;
 
+    @Column(nullable = false)
+    private String password;
+
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 
@@ -43,4 +46,7 @@ public class User {
 
     public LocalDateTime getJoinedAt() { return joinedAt; }
     public void setJoinedAt(LocalDateTime joinedAt) { this.joinedAt = joinedAt; }
+
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 }
